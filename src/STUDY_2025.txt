@@ -1,0 +1,88 @@
+------------------------------------------------
+
+LIFT
+L - Locate code quickly
+I - Identify code at a glance
+F - Flattest structure possible
+T - Try to be DRY - Dont Repeat Yourself
+
+------------------------------------------------
+------------------------------------------------
+
+Immutability is..
+Not mutating existing objects in memory, but rather creating new objects.
+------------------------------------------------
+in:     UserRepositoryService.enroll(classId: string)
+lines:  this.currentUser.classes.push(classId);
+means:  the 'classes' array is mutating by adding an object to an existing array
+        and the 'currentUser' object is mutating by changing the contents of the classes of the currentUser
+fix:    this.currentUser = {} 
+            --> set the currentUser to a new object
+        this.currentUser = { ... } 
+            --> spread operator, that coppies all props from the old object to a new object
+        this.currentUser = { ...this.currentUser } 
+            --> coppies all props from the old currentUser to a new object, on the same local prop (this.currentUser)
+        this.currentUser = { ...this.currentUser, classes: } 
+            --> overrides the classes prop by providing a new classes prop in this new object
+        this.currentUser = { ...this.currentUser, classes: this.currentUser.classes.concat(classId) } 
+            --> instead of pushing a new id to the existing array, we set it to a new array
+means:  the concat method actually returns a new array with a new value added, instead of mutating an existing array.
+------------------------------------------------
+in:     UserRepositoryService.drop(classId: string)
+lines:  this.currentUser.classes = this.currentUser.classes.filter((c: string) => c !== classId);
+means:  the classes array is not mutating, but the currentUser is by changing its classes prop
+fix:    this.currentUser = { ...this.currentUser, 
+            --> coppies all props from the old currentUser to a new object, on the same local prop (this.currentUser)
+        classes: this.currentUser.classes.filter((c: string) => c !== classId)};
+            --> setting the currentUser to a new object with its same props and settings classes to a new filter array
+------------------------------------------------
+in:     UserRepositoryService.saveUser(user: IUser)
+lines:  user.classes = user.classes || [];
+        this.currentUser = user;
+means:  this is not mutating the existing currentUser variable, but replacing the value.
+        creates a potential mutation outside of this function, because its pointing the existing currentUser
+        to the same user object and memory that is passed in.
+        if the code that calls this saveUser() were to change its local user object after calling saveUser(),
+        it could actually change the currentUser of this.
+fix:    let classes = user.classes || [];
+            --> create a new variable named classes
+        this.currentUser = { ...user, classes: [...classes]};
+            --> set the currentUser to a new object, with all of the props from the past user object
+            --> and set a new classes prop to a new array with all the members in classes variable
+means:  will update currentUser to a new object that is populated with all of the props from the past user
+
+------------------------------------------------
+------------------------------------------------
+
+StrictMode is..
+typescript validation and angular validation checks that are performed when the angular app is compiled
+------------------------------------------------
+in:     tsconfig.json
+lines:  "angularCompilerOptions": {
+            "enableI18nLegacyMessageIdFormat": false,
+            "strictInjectionParameters": true,
+            "strictInputAccessModifiers": true,
+            "strictTemplates": true
+        }
+means:  Angular-spesific strict mode flags
+lines:  "strict": false,
+means:  default as true from angular 12, and best practice to be true
+        using strict mode allows catching bugs during compilation while developing, rather then letting them slip to prod
+------------------------------------------------
+in:     AccountMenuComponent.ctor
+lines:  @Input() user;
+means:  with strict mode on, typescript requires to explicilty indicate when using 'any' data type
+fix1:   @Input() user = any;
+means:  explicilty indicating the 'any' data type, so there is no error.
+fix2:   @Input() user!: IUser | null;
+means:  because there is only a need for a user object to be passed to this parameter, it needs to be set with an actuall user data type, 
+        or NULL, because when the user is not logged-in, the user will be null.
+        this is an @input prop that will get set from another component, so exclamation point (!) allows it not to be set explicitly
+fix3:   @Input() user: IUser | null = null; 
+means:  NULL is the value when the user is not logged-in, so thats a valid state
+
+
+
+
+
+
