@@ -2,15 +2,15 @@ import { NgModule } from "@angular/core";
 import { RouterModule } from "@angular/router";
 
 import { CatalogComponent } from "./catalog.component";
-import { CatalogRepositoryService } from "./catalog-repository.service";
 import { SharedModule } from "../Shared/shared.module";
-import { FilterClassesService } from "./filter-classes.service";
 import { EnrollComponent } from './enroll.component';
+//import { CatalogRepositoryService } from "./catalog-repository.service";
+//import { FilterClassesService } from "./filter-classes.service";
 
 @NgModule({
         imports: [SharedModule, RouterModule],
         declarations: [CatalogComponent, EnrollComponent],
         exports: [],
-        providers: [CatalogRepositoryService, FilterClassesService]
+        providers: [] //CatalogRepositoryService, FilterClassesService
 })
 export class CatalogModule {};

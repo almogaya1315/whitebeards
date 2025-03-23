@@ -115,8 +115,8 @@ means:  the input 'loading' is declared in the component constructor
 ------------------------------------------------
 ------------------------------------------------
 
-TODO: in catalog.component.html
-      Create component for..
+DONE: in catalog.component.html
+      Create component for enroll.component.ts
 
         <td class="enroll center">
           <span class="sign-in" *ngIf="!userRepo.currentUser" disabled>Sign In to Enroll</span>
@@ -126,6 +126,38 @@ TODO: in catalog.component.html
             (click)="drop(class)">Drop</button>
           <wb-loading-spinner [loading]="class.processing"></wb-loading-spinner>
         </td>
+
+------------------------------------------------
+------------------------------------------------
+
+@Inject -> service decorator that makes a service class injected to other components
+@Injectable -> means that the service can be injected to in the ctor
+Best practice is using @Injectable because you never know when you will need to inject.
+------------------------------------------------
+in:     catalog-repository.service.ts
+lines:  constructor(@Inject(UserRepositoryService) private userRepo: UserRepositoryService) { }
+means:  instead of marking the entire service as Injectable, params can be marked using the Inject.
+        this approch is not recommended unless the service injected is not using the service's data type as the token for the service
+------------------------------------------------
+in:     UserRepositoryService.@Injectable()
+lines:  providedIn: 'root' 
+means:  the metadata object in the @Injectable decorator, has a 'providedIn' that is set to 'root'
+        which explicitly tells angular to provide this service in the root injector, 
+        which makes the service available to entire application as a singleton.
+        that makes this code: 'providers: [UserRepositoryService]', in various modules metadata (@NgModule), obselete.
+------------------------------------------------
+in:     UserRepositoryService.@Injectable()
+lines:  providedIn: 'platform' 
+means:  used when having multiple angular apps running on a single page
+------------------------------------------------
+* Deprecated uses from Angular 14 --> 
+  providedIn: 'any'
+  providedIn: CustomModule
+------------------------------------------------
+* Not using the providedIn metadata, is very uncommon, 
+  but is used in lazy loaded modules, when services are loaded lazily,
+  because a new injector is used to create dif instances of the service, 
+  for each component, instead of the root injector.
 
 
 

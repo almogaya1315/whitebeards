@@ -4,12 +4,12 @@ import { RouterModule } from "@angular/router";
 
 import { NavBarComponent } from "./nav-bar.component";
 import { AccountMenuComponent } from "./account-menu.component";
-import { UserRepositoryService } from "../services/user-repository.service"
+//import { UserRepositoryService } from "../services/user-repository.service"
 
 @NgModule({
     imports: [CommonModule, RouterModule],
     exports: [NavBarComponent, AccountMenuComponent],
     declarations: [NavBarComponent, AccountMenuComponent],
-    providers: [UserRepositoryService]
+    providers: [] //UserRepositoryService
 })
 export class CoreModule {};
