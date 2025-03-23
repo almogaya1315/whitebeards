@@ -35,15 +35,19 @@ import { IUser } from './user.model';
   
     registerUser(user: IUser) {
       this.saving = true;
-      this.userRepository.saveUser(user)
+      this.saveAndRedirect(user);
+    }
+
+    cancel() {
+        this.router.navigate(['/']);
+      }
+
+    private saveAndRedirect(user: IUser){
+        this.userRepository.saveUser(user)
         .subscribe({
           error: () => this.saving = false,
           complete: () => this.router.navigate(['/catalog'])
         });
-    }
-  
-    cancel() {
-      this.router.navigate(['/']);
     }
   }
   

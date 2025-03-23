@@ -81,7 +81,51 @@ means:  because there is only a need for a user object to be passed to this para
 fix3:   @Input() user: IUser | null = null; 
 means:  NULL is the value when the user is not logged-in, so thats a valid state
 
+------------------------------------------------
+------------------------------------------------
 
+Basic Modules:
+-app.module
+-routing.module
+-core.module - community debates on necessity
+-shared.module
+-feature.module
+
+in:     SharedModule.@NgModule()
+lines:  [LoadingSpinnerComponent, CommonModule],
+means:  when other modules import the shared module, the LoadingSpinnerComponent & CommonModule will be available
+
+Feature modules allows to take grouped content, and turn into an actuall angular module,
+that can be loaded lazily or eagerly, that help with performance.
+It also allows to be encapsulated properly by controling export or keep private within the module.
+
+------------------------------------------------
+------------------------------------------------
+
+@Input & @Output 
+
+in:     LoadingSpinnerComponent.@Component()
+lines:  inputs: ['loading']
+means:  the input 'loading' is declared in the component metadata
+OR
+in:     LoadingSpinnerComponent.ctor
+lines:  @Input() loading: boolean = false;
+means:  the input 'loading' is declared in the component constructor
+
+------------------------------------------------
+------------------------------------------------
+
+TODO: in catalog.component.html
+      Create component for..
+
+        <td class="enroll center">
+          <span class="sign-in" *ngIf="!userRepo.currentUser" disabled>Sign In to Enroll</span>
+          <button *ngIf="userRepo.currentUser && !class.enrolled && !class.processing"
+            (click)="enroll(class)">Enroll</button>
+          <button *ngIf="userRepo.currentUser && class.enrolled && !class.processing"
+            (click)="drop(class)">Drop</button>
+          <wb-loading-spinner [loading]="class.processing"></wb-loading-spinner>
+        </td>
 
 
 
