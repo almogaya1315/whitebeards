@@ -6,8 +6,9 @@ import { SignInComponent } from './users/sign-in.component';
 
 const routes: Routes = [
   { path: 'catalog', component: CatalogComponent, },
-  { path: 'users/register', component: RegisterComponent, },
-  { path: 'users/sign-in', component: SignInComponent, },
+  { path: 'users', loadChildren: () => import('./users/users.module').then(m => m.UsersModule) },
+  //{ path: 'users/register', component: RegisterComponent, },
+  //{ path: 'users/sign-in', component: SignInComponent, },
   { path: '', redirectTo: '/catalog', pathMatch: 'full' },
 ];
 

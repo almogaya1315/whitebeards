@@ -115,6 +115,7 @@ means:  the input 'loading' is declared in the component constructor
 ------------------------------------------------
 ------------------------------------------------
 
+*OPTIONAL*
 DONE: in catalog.component.html
       Create component for enroll.component.ts
 
@@ -131,7 +132,7 @@ DONE: in catalog.component.html
 ------------------------------------------------
 
 @Inject -> service decorator that makes a service class injected to other components
-@Injectable -> means that the service can be injected to in the ctor
+@Injectable -> means that the service can be injected-to, in the ctor
 Best practice is using @Injectable because you never know when you will need to inject.
 ------------------------------------------------
 in:     catalog-repository.service.ts
@@ -158,6 +159,213 @@ means:  used when having multiple angular apps running on a single page
   but is used in lazy loaded modules, when services are loaded lazily,
   because a new injector is used to create dif instances of the service, 
   for each component, instead of the root injector.
+
+------------------------------------------------
+------------------------------------------------
+
+Lazy loading feature modules
+
+in:     app-routing.module.ts
+lines:  { path: 'users', loadChildren: () => import('./users/users.module').then(m => m.UsersModule) },
+means:  loadChildren -> defines angular to load child routes from another module
+        import       -> dynamically imports feature module when the navigates to the section (the feature module must export itself in the ts)
+        then         -> after the asynchronous loading of the feature module, it returns the loaded module
+------------------------------------------------
+in:     users-routing.module.ts
+lines:  { path: 'register', component: RegisterComponent },
+means:  each lazily loaded module should have its own routing module
+        register -> this would be appended to the app-routing's root with a backSlash (/)
+------------------------------------------------
+in:     UsersRoutingModule.@NgModule()
+lines:  imports: [RouterModule.forChild(routes)],
+means:  the app-routing calls 'forRoot' beacuse it handles routes at the root of the website
+        the feaute-module-routing calls 'forChild' because it handles child routes just for the feature-module
+        must add the feaute-module-routing to the feature-module imports
+        must remove eagerly loading in app.module of the feature-module
+
+------------------------------------------------
+------------------------------------------------
+
+Deploying Production Builds
+is a performance best practice, that makes sure to build the app for prod and deploy it to a web server.
+
+CLI -> npm run build (--prod: old syntax) 
+    -> Builds the app for Production
+    -> and Packaged the app in the dist folder
+CLI -> npm install -g http-server 
+    -> very simple little web server
+CLI -> http-server dist/whitebeards
+    -> run the server and pass the dist dir that was packed to prod
+------------------------------------------------
+CLI -> ls 
+    -> shows all directories
+CLI -> cd.. 
+    -> goes up one dir
+
+------------------------------------------------
+------------------------------------------------
+
+Monitoring Bundle Sizes
+is knowing how large is the app from release to release.
+
+When angular builds, it is Packaged into bundles/chunks, which are downloaded to the browser, when the site is navigated to.
+The tools angular uses to display the chunks data, are in the output of 'npm run build'
+
+in:     TERMINAL after running 'npm run build'
+------------------------------------------------
+lines:  Initial Chunk Files
+means:  the chunks that were created and how big they are
+------------------------------------------------
+lines:  Initial Total
+means:  how much will be downloaded on the initial load
+------------------------------------------------
+lines:  Lazy Chunk Files 
+means:  the lazy chunks that were created and how big they are
+
+
+in:     angulat.json
+------------------------------------------------
+lines:  "budgets": [
+means:  allows to set size budgets for the app builds
+------------------------------------------------
+lines:  "type": "initial",
+means:  default from the CLI, defining warnings and error levels based on the budgets
+------------------------------------------------
+lines:  "type": "anyComponentStyle", 
+means:  will be triggered if the css for any single component is larger then the values defined
+------------------------------------------------
+lines:  "maximumWarning": "500kb",
+means:  will generate a warning during the prod build if the initial bundle size exceeds the maximumWarning value
+------------------------------------------------
+lines:  "maximumError": "1mb"
+means:  will generate an error and fail the build if the initial bundle size exceeds the maximumError value
+
+------------------------------------------------
+
+Using Lodash library that provides functions for working with arrays, etc.
+CLI -> npm install lodash
+CLI -> npm install @types/lodash --savedev
+
+
+in:     UserRepositoryService.enroll()
+------------------------------------------------
+lines:  this.currentUser = { ...this.currentUser, classes: concat(this.currentUser.classes, classId) };
+means:  Using lodash concat, instead of js built-in concat, to demonstrate what happens when exceeding initial bundle size budget
+------------------------------------------------
+case:   changing the maximumWarning to 320kb
+in:     TERMINAL after running 'npm run build'
+lines:  Warning: bundle initial exceeded maximum budget. Budget 320.00 kB was not met by 59.97 kB with a total of 379.97 kB.
+------------------------------------------------
+case:   changing the maximumError to 300kb
+in:     TERMINAL after running 'npm run build'
+lines:  Error: bundle initial exceeded maximum budget. Budget 300.00 kB was not met by 7.25 kB with a total of 307.25 kB.
+
+------------------------------------------------
+
+in:     angulat.json -> "budgets": [
+------------------------------------------------
+lines:  "type": "bundle", "name": "",
+means:  budget for a specifically named bundle
+------------------------------------------------
+lines:  "type": "allScript",
+means:  to monitor the size of the JS files for the entire app
+------------------------------------------------
+lines:  "type": "allScript",
+means:  to monitor the size of the JS files for the entire app
+------------------------------------------------
+lines:  "type": "all",
+means:  to monitor the size of the entire app
+------------------------------------------------
+lines:  "type": "any",
+means:  to monitor that no file, of any type exceeds the budget
+------------------------------------------------
+lines:  "type": "initial",
+        "maximumWarning": "5%",
+        "maximumError": "10%",
+        "baseline": "305kb"
+means:  a warning if the app grows by more then 5 percent,
+        and an error if the app grows by more then 10 percent.
+        must define baseline for this to work.
+
+------------------------------------------------
+------------------------------------------------
+
+Using OnPush Change Detection (Or Not)
+Angular registers and listens to all low-level events, such as click & mouseover,
+    and asynchronous events like JS's timeout, or API calls etc.
+When any event raises, it checks every one of the angular binding, to see if it changed,
+    and it will revaluate the bindings even if only one item changes.
+Angular can manage 10,000 bindings very quickly,
+    but if there is an expensive calc to generate the value for some binding,
+    it should be done only when its totally necessary, with OnPush Change Detection
+OnPush should be uses ONLY if there is a component with performance issues, 
+    and its caused by the change detection that is calculating an expensive expression to be reevaluated too frequently.
+
+in:     CatalogComponent.@Component()
+lines:  changeDetection: ChangeDetectionStrategy.OnPush
+means:  Angular will only do comparisons to objects references, not to every one of the object's props
+        And instead change detection firing for every browser event, OnPush fires when input refernces change,
+        Or when an async observable fires an event, and in few other cases.
+        Immutability becomes very important because of the refs behavior.
+
+------------------------------------------------
+------------------------------------------------
+
+Pure pipe performance -->
+Pipe are pure by default, meaning they don't work with data mutation.
+They get revaluated only if the actual object reference changes, of the object that the pipe is being applied to.
+The Best practice is using a pure pipe and using immutability to make the pipe work, in the component logic.
+
+------------------------------------------------
+Custom Pipe -->
+
+in:     'order-by.pipe.ts'
+------------------------------------------------
+import { Pipe, PipeTransform } from "@angular/core";
+@Pipe({
+    name: 'orderBy'
+})
+export class OrderByPipe implements PipeTransform {
+    transform(array: any[], field: string) : any[] {
+        if (!Array.isArray(array)){
+            return array;
+        } else return array.sort((x, y) => x[field] > y[field] ? 1 : x[field] < y[field] ? -1 : 0);
+    }
+}
+------------------------------------------------
+in:     'catalog.module.ts'
+------------------------------------------------
+@NgModule({
+        imports: [...],
+        declarations: [OrderByPipe],
+        exports: [],
+        providers: [] 
+})
+------------------------------------------------
+in:     catalog.component.html
+lines:  <th (click)="orderByField='professor'">Professor</th>
+means:  register to the click event. And when clicked, prop 'orderByField' is set to 'professor'
+
+in:     catalog.component.html
+lines:  <tr *ngFor="let class of visibleClasses | orderBy: orderByField">
+means:  sort the 'visibleClasses' using the 'orderByPipe', and will order by the 'orderByField' prop
+        NOT the 'visibleClasses' array in changing, but a property on an object in that array.
+
+in:     CatalogComponent
+lines:  orderByField: string = '';
+means:  declares public variable 'orderByField' in the component.ts
+
+in:     OrderByPipe.@Pipe()
+lines:  pure: false
+means:  makes the pipe unpure, causing it to respond to data mutation.
+        generates a great performance cost.
+
+
+
+
+
+
+
 
 
 

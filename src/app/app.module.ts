@@ -13,7 +13,7 @@ import { AppComponent } from './app.component';
 import { CoreModule } from './Core/core.module';
 //import { SharedModule } from './Shared/shared.module';
 import { CatalogModule } from './catalog/catalog.module';
-import { UsersModule } from './users/users.module';
+//import { UsersModule } from './users/users.module';
 
 @NgModule({
   declarations: [
@@ -27,7 +27,7 @@ import { UsersModule } from './users/users.module';
     CoreModule,
     //SharedModule,
     CatalogModule,
-    UsersModule,
+    //UsersModule,
     BrowserModule,
     FormsModule,
     ReactiveFormsModule,

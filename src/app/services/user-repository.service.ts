@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, EMPTY, throwError, timer, delay } from 'rxjs';
+import { concat } from 'lodash';
 
 import { IUser } from '../users/user.model';
 
@@ -29,6 +30,7 @@ export class UserRepositoryService {
 
     //this.currentUser.classes.push(classId);
     this.currentUser = { ...this.currentUser, classes: this.currentUser.classes.concat(classId) };
+    //this.currentUser = { ...this.currentUser, classes: concat(this.currentUser.classes, classId) };
 
     //return EMPTY.pipe(delay(1000));
     return timer(1000);
